@@ -1,0 +1,7 @@
+    - [ ] Classes for 
+        - [ ] Inventory, 
+        - [ ] Product,
+        - [ ] TaxRateCalculator,
+        - [ ] Basket, 
+        - [ ] Receipt
+    - [ ] Load order from .txt
