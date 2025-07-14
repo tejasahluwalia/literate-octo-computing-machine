@@ -12,8 +12,8 @@ namespace SalesTax
             {
                 double taxRate = taxRateCalculator.GetProductTaxRate(product);
                 double amount = (double)(product.Price * qty);
-                double tax = amount * taxRate; // TODO: Round-up to 0.05
-                Console.WriteLine($"{qty} {product.Name}: {amount + tax}");
+                double tax = Math.Ceiling(amount * taxRate * 20) / 20;
+                Console.WriteLine($"{qty} {product.Name}: Amt: {amount} + Tax: {tax} = {amount + tax}");
                 totalAmount += amount;
                 totalTax += tax;
             }

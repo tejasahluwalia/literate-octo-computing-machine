@@ -4,9 +4,9 @@
 3. Receipt is generated for the shopping basket with a TaxRateCalculator.
 
 # Tasks
-    - [ ] Product
-    - [ ] Basket
-    - [ ] TaxRateCalculator
-    - [ ] ReceiptGenerator
+    - [x] Product
+    - [x] Basket
+    - [x] TaxRateCalculator
+    - [x] ReceiptGenerator
     - [ ] InputParser
     

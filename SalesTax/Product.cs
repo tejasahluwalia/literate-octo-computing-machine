@@ -9,6 +9,6 @@ namespace SalesTax
         Other
     };
 
-    public readonly record struct Product(string Name, ProductCategory Category, decimal Price, bool IsImported);
+    public readonly record struct Product(string Name, ProductCategory Category, double Price, bool IsImported);
 
 }
