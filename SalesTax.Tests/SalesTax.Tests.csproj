@@ -12,4 +12,8 @@
     <ProjectReference Include="../SalesTax/SalesTax.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Data\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
