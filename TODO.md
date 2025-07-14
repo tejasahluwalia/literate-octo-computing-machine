@@ -8,5 +8,5 @@
     - [x] Basket
     - [x] TaxRateCalculator
     - [x] ReceiptGenerator
-    - [ ] InputParser
+    - [x] OrderParser
     
