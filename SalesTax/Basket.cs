@@ -1,22 +1,23 @@
 namespace SalesTax
-
 {
     public class Basket
     {
-        public Dictionary<Product, int> Products = [];
+        private readonly Dictionary<Product, int> _products = [];
 
         public void AddProduct(Product product, int quantity)
         {
-            if (Products.ContainsKey(product))
-            {
-                Products[product] += quantity;
-            }
+            if (_products.ContainsKey(product))
+                _products[product] += quantity;
             else
-            {
-                Products.TryAdd(product, quantity);
-            }
-            return;
+                _products[product] = quantity;
         }
+
+        public IEnumerable<(Product Product, int Quantity)> GetItems()
+            => _products.Select(kvp => (kvp.Key, kvp.Value));
+
+        public bool IsEmpty => _products.Count == 0;
+
+        public int ItemCount => _products.Count;
     }
 }
 

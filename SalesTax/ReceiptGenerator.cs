@@ -1,43 +1,31 @@
 namespace SalesTax
 {
-    public readonly record struct ReceiptLine(int Quantity, string ProductName, double Amount, double Tax, double Total);
+    public readonly record struct ReceiptLine(int Quantity, string ProductName, decimal Amount, decimal Tax, decimal Total);
     
-    public readonly record struct Receipt(List<ReceiptLine> Lines, double TotalTax, double TotalAmount);
+    public readonly record struct Receipt(List<ReceiptLine> Lines, decimal TotalTax, decimal TotalAmount);
 
-    public static class ReceiptGenerator
+    public class ReceiptGenerator(TaxCalculator taxCalculator)
     {
-        public static Receipt GenerateReceipt(Basket basket, TaxRateCalculator taxRateCalculator)
+        private readonly TaxCalculator _taxCalculator = taxCalculator;
+
+        public Receipt GenerateReceipt(Basket basket)
         {
             var lines = new List<ReceiptLine>();
-            double totalAmount = 0.0;
-            double totalTax = 0.0;
+            decimal totalTax = 0;
+            decimal totalAmount = 0;
 
-            foreach ((Product product, int qty) in basket.Products)
+            foreach (var (product, quantity) in basket.GetItems())
             {
-                double taxRate = taxRateCalculator.GetProductTaxRate(product);
-                double amount = (double)(product.Price * qty);
-                double tax = Math.Ceiling(amount * taxRate * 20) / 20.0; // Round up to nearest 0.05
-                double lineTotal = amount + tax;
-                
-                lines.Add(new ReceiptLine(qty, product.Name, amount, tax, lineTotal));
-                totalAmount += amount;
+                decimal baseAmount = product.CalculateBaseAmount(quantity);
+                decimal tax = _taxCalculator.CalculateTax(product, quantity);
+                decimal lineTotal = baseAmount + tax;
+
+                lines.Add(new ReceiptLine(quantity, product.Name, baseAmount, tax, lineTotal));
+                totalAmount += baseAmount;
                 totalTax += tax;
             }
 
             return new Receipt(lines, totalTax, totalAmount + totalTax);
-        }
-
-        public static void PrintTotal(Basket basket, TaxRateCalculator taxRateCalculator)
-        {
-            var receipt = GenerateReceipt(basket, taxRateCalculator);
-            
-            foreach (var line in receipt.Lines)
-            {
-                Console.WriteLine($"{line.Quantity} {line.ProductName}: {line.Total.ToString("0.00")}");
-            }
-
-            Console.WriteLine($"Sales Taxes: {receipt.TotalTax.ToString("0.00")}");
-            Console.WriteLine($"Total: {receipt.TotalAmount.ToString("0.00")}");
         }
     }
 }

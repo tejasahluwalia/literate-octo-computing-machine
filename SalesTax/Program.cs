@@ -4,10 +4,11 @@ Console.WriteLine("Running Sales Tax");
 Console.WriteLine("Enter products one by one (format: '1 book at 12.49')");
 Console.WriteLine("Enter 'done' to checkout");
 
-double BASIC_SALES_TAX_RATE = 10.0/100;
-double IMPORT_TAX_RATE = 5.0/100;
+decimal BASIC_SALES_TAX_RATE = 10.0m/100;
+decimal IMPORT_TAX_RATE = 5.0m/100;
 
-TaxRateCalculator taxRateCalculator = new(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
+var taxCalculator = new TaxCalculator(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
+var receiptGenerator = new ReceiptGenerator(taxCalculator);
 var basket = new Basket();
 
 while (true)
@@ -36,9 +37,9 @@ while (true)
     }
     
     Console.WriteLine("\nCurrent basket:");
-    foreach (var item in basket.Products)
+    foreach (var (product, quantity) in basket.GetItems())
     {
-        Console.WriteLine($"  {item.Value} x {item.Key.Name} - ${item.Key.Price:0.00} each");
+        Console.WriteLine($"  {quantity} x {product.Name} - ${product.Price:0.00} each");
     }
     
     Console.Write("\nAdd more products? (y/n): ");
@@ -50,4 +51,5 @@ while (true)
 }
 
 Console.WriteLine("\n--- RECEIPT ---");
-ReceiptGenerator.PrintTotal(basket, taxRateCalculator);
+var receipt = receiptGenerator.GenerateReceipt(basket);
+ReceiptPrinter.PrintReceipt(receipt);
