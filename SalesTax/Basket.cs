@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace SalesTax
 {
     public class Basket
@@ -18,6 +20,16 @@ namespace SalesTax
         public bool IsEmpty => _products.Count == 0;
 
         public int ItemCount => _products.Count;
+
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            foreach (var (product, quantity) in _products)
+            {
+                result.AppendLine($"{quantity} {product.Name} at {product.Price:C}");
+            }
+            return result.ToString();
+        }
     }
 }
 

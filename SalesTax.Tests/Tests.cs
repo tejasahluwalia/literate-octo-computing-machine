@@ -8,11 +8,11 @@ public class SalesTaxIntegrationTests
     private const decimal BASIC_SALES_TAX_RATE = 10.0m / 100;
     private const decimal IMPORT_TAX_RATE = 5.0m / 100;
     private readonly TaxCalculator _taxCalculator = new(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
-    private readonly ReceiptGenerator _receiptGenerator;
+    private readonly ReceiptService _receiptService;
 
     public SalesTaxIntegrationTests()
     {
-        _receiptGenerator = new ReceiptGenerator(_taxCalculator);
+        _receiptService = new ReceiptService(_taxCalculator);
     }
 
     [Test]
@@ -28,7 +28,7 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = _receiptGenerator.GenerateReceipt(basket);
+        var receipt = _receiptService.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(3);
@@ -68,7 +68,7 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = _receiptGenerator.GenerateReceipt(basket);
+        var receipt = _receiptService.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(2);
@@ -104,7 +104,7 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = _receiptGenerator.GenerateReceipt(basket);
+        var receipt = _receiptService.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(4);
@@ -146,7 +146,7 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputData);
-        var receipt = _receiptGenerator.GenerateReceipt(basket);
+        var receipt = _receiptService.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().GreaterThan(0);

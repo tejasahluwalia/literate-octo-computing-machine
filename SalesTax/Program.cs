@@ -8,7 +8,7 @@ decimal BASIC_SALES_TAX_RATE = 10.0m/100;
 decimal IMPORT_TAX_RATE = 5.0m/100;
 
 var taxCalculator = new TaxCalculator(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
-var receiptGenerator = new ReceiptGenerator(taxCalculator);
+var receiptService = new ReceiptService(taxCalculator);
 var basket = new Basket();
 
 while (true)
@@ -19,7 +19,7 @@ while (true)
     if (string.IsNullOrWhiteSpace(input))
         continue;
 
-    if (string.Equals(input, "done"))
+    if (string.Equals(input.ToLower(), "done"))
         break;
 
     try
@@ -37,11 +37,8 @@ while (true)
     }
     
     Console.WriteLine("\nCurrent basket:");
-    foreach (var (product, quantity) in basket.GetItems())
-    {
-        Console.WriteLine($"  {quantity} x {product.Name} - {product.Price:0.00} each");
-    }
-    
+    Console.WriteLine(basket);
+
     Console.Write("\nAdd more products? (y/n): ");
     var response = Console.ReadLine();
     if (response?.ToLower() == "n")
@@ -51,5 +48,5 @@ while (true)
 }
 
 Console.WriteLine("\n--- RECEIPT ---");
-var receipt = receiptGenerator.GenerateReceipt(basket);
-ReceiptPrinter.PrintReceipt(receipt);
+var receipt = receiptService.GenerateReceipt(basket);
+Console.WriteLine(receipt);
