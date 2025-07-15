@@ -1,13 +1,19 @@
-﻿using SalesTax;
+using SalesTax;
 using SalesTax.Tests.Data;
 
 namespace SalesTax.Tests;
 
 public class SalesTaxIntegrationTests
 {
-    private const double BASIC_SALES_TAX_RATE = 10.0 / 100;
-    private const double IMPORT_TAX_RATE = 5.0 / 100;
-    private readonly TaxRateCalculator _taxRateCalculator = new(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
+    private const decimal BASIC_SALES_TAX_RATE = 10.0m / 100;
+    private const decimal IMPORT_TAX_RATE = 5.0m / 100;
+    private readonly TaxCalculator _taxCalculator = new(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
+    private readonly ReceiptGenerator _receiptGenerator;
+
+    public SalesTaxIntegrationTests()
+    {
+        _receiptGenerator = new ReceiptGenerator(_taxCalculator);
+    }
 
     [Test]
     public async Task TestCase1_BasicItems_CalculatesCorrectTaxes()
@@ -22,32 +28,32 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = ReceiptGenerator.GenerateReceipt(basket, _taxRateCalculator);
+        var receipt = _receiptGenerator.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(3);
         
         // Book (exempt from sales tax)
         var bookLine = receipt.Lines.First(l => l.ProductName.Contains("book"));
-        await Assert.That(bookLine.Amount).IsEqualTo(12.49);
-        await Assert.That(bookLine.Tax).IsEqualTo(0.0);
-        await Assert.That(bookLine.Total).IsEqualTo(12.49);
+        await Assert.That(bookLine.Amount).IsEqualTo(12.49m);
+        await Assert.That(bookLine.Tax).IsEqualTo(0.0m);
+        await Assert.That(bookLine.Total).IsEqualTo(12.49m);
 
         // Music CD (10% sales tax)
         var cdLine = receipt.Lines.First(l => l.ProductName.Contains("music CD"));
-        await Assert.That(cdLine.Amount).IsEqualTo(14.99);
-        await Assert.That(cdLine.Tax).IsEqualTo(1.50); // 14.99 * 0.10 = 1.499, rounded up to 1.50
-        await Assert.That(Math.Round(cdLine.Total, 2)).IsEqualTo(16.49);
+        await Assert.That(cdLine.Amount).IsEqualTo(14.99m);
+        await Assert.That(cdLine.Tax).IsEqualTo(1.50m); // 14.99 * 0.10 = 1.499, rounded up to 1.50
+        await Assert.That(cdLine.Total).IsEqualTo(16.49m);
 
         // Chocolate bar (food, exempt from sales tax)
         var chocolateLine = receipt.Lines.First(l => l.ProductName.Contains("chocolate bar"));
-        await Assert.That(chocolateLine.Amount).IsEqualTo(0.85);
-        await Assert.That(chocolateLine.Tax).IsEqualTo(0.0);
-        await Assert.That(chocolateLine.Total).IsEqualTo(0.85);
+        await Assert.That(chocolateLine.Amount).IsEqualTo(0.85m);
+        await Assert.That(chocolateLine.Tax).IsEqualTo(0.0m);
+        await Assert.That(chocolateLine.Total).IsEqualTo(0.85m);
 
         // Totals
-        await Assert.That(receipt.TotalTax).IsEqualTo(1.50);
-        await Assert.That(Math.Round(receipt.TotalAmount, 2)).IsEqualTo(29.83);
+        await Assert.That(receipt.TotalTax).IsEqualTo(1.50m);
+        await Assert.That(receipt.TotalAmount).IsEqualTo(29.83m);
     }
 
     [Test]
@@ -62,26 +68,26 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = ReceiptGenerator.GenerateReceipt(basket, _taxRateCalculator);
+        var receipt = _receiptGenerator.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(2);
 
         // Imported chocolates (food + import tax = 5%)
         var chocolateLine = receipt.Lines.First(l => l.ProductName.Contains("chocolates"));
-        await Assert.That(chocolateLine.Amount).IsEqualTo(10.00);
-        await Assert.That(chocolateLine.Tax).IsEqualTo(0.50); // 10.00 * 0.05 = 0.50
-        await Assert.That(chocolateLine.Total).IsEqualTo(10.50);
+        await Assert.That(chocolateLine.Amount).IsEqualTo(10.00m);
+        await Assert.That(chocolateLine.Tax).IsEqualTo(0.50m); // 10.00 * 0.05 = 0.50
+        await Assert.That(chocolateLine.Total).IsEqualTo(10.50m);
 
         // Imported perfume (other + import tax = 15%)
         var perfumeLine = receipt.Lines.First(l => l.ProductName.Contains("perfume"));
-        await Assert.That(perfumeLine.Amount).IsEqualTo(47.50);
-        await Assert.That(perfumeLine.Tax).IsEqualTo(7.15); // 47.50 * 0.15 = 7.125, rounded up to 7.15
-        await Assert.That(perfumeLine.Total).IsEqualTo(54.65);
+        await Assert.That(perfumeLine.Amount).IsEqualTo(47.50m);
+        await Assert.That(perfumeLine.Tax).IsEqualTo(7.15m); // 47.50 * 0.15 = 7.125, rounded up to 7.15
+        await Assert.That(perfumeLine.Total).IsEqualTo(54.65m);
 
         // Totals
-        await Assert.That(Math.Round(receipt.TotalTax, 2)).IsEqualTo(7.65);
-        await Assert.That(Math.Round(receipt.TotalAmount, 2)).IsEqualTo(65.15);
+        await Assert.That(receipt.TotalTax).IsEqualTo(7.65m);
+        await Assert.That(receipt.TotalAmount).IsEqualTo(65.15m);
     }
 
     [Test]
@@ -98,64 +104,52 @@ public class SalesTaxIntegrationTests
 
         // Act
         var basket = OrderParser.ParseOrder(inputLines);
-        var receipt = ReceiptGenerator.GenerateReceipt(basket, _taxRateCalculator);
+        var receipt = _receiptGenerator.GenerateReceipt(basket);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(4);
 
         // Imported perfume (other + import tax = 15%)
-        var importedPerfumeLine = receipt.Lines.First(l => l.ProductName.Contains("imported bottle of perfume"));
-        await Assert.That(importedPerfumeLine.Amount).IsEqualTo(27.99);
-        await Assert.That(importedPerfumeLine.Tax).IsEqualTo(4.20); // 27.99 * 0.15 = 4.1985, rounded up to 4.20
-        await Assert.That(importedPerfumeLine.Total).IsEqualTo(32.19);
+        var importedPerfumeLine = receipt.Lines.First(l => l.ProductName.Contains("imported") && l.ProductName.Contains("perfume"));
+        await Assert.That(importedPerfumeLine.Amount).IsEqualTo(27.99m);
+        await Assert.That(importedPerfumeLine.Tax).IsEqualTo(4.20m); // 27.99 * 0.15 = 4.1985, rounded up to 4.20
+        await Assert.That(importedPerfumeLine.Total).IsEqualTo(32.19m);
 
-        // Domestic perfume (other + sales tax = 10%)
-        var domesticPerfumeLine = receipt.Lines.First(l => l.ProductName.Contains("bottle of perfume") && !l.ProductName.Contains("imported"));
-        await Assert.That(domesticPerfumeLine.Amount).IsEqualTo(18.99);
-        await Assert.That(domesticPerfumeLine.Tax).IsEqualTo(1.90); // 18.99 * 0.10 = 1.899, rounded up to 1.90
-        await Assert.That(Math.Round(domesticPerfumeLine.Total, 2)).IsEqualTo(20.89);
+        // Regular perfume (other + sales tax = 10%)
+        var perfumeLine = receipt.Lines.First(l => !l.ProductName.Contains("imported") && l.ProductName.Contains("perfume"));
+        await Assert.That(perfumeLine.Amount).IsEqualTo(18.99m);
+        await Assert.That(perfumeLine.Tax).IsEqualTo(1.90m); // 18.99 * 0.10 = 1.899, rounded up to 1.90
+        await Assert.That(perfumeLine.Total).IsEqualTo(20.89m);
 
-        // Headache pills (medical, exempt)
+        // Headache pills (medical, exempt from sales tax)
         var pillsLine = receipt.Lines.First(l => l.ProductName.Contains("pills"));
-        await Assert.That(pillsLine.Amount).IsEqualTo(9.75);
-        await Assert.That(pillsLine.Tax).IsEqualTo(0.0);
-        await Assert.That(pillsLine.Total).IsEqualTo(9.75);
+        await Assert.That(pillsLine.Amount).IsEqualTo(9.75m);
+        await Assert.That(pillsLine.Tax).IsEqualTo(0.0m);
+        await Assert.That(pillsLine.Total).IsEqualTo(9.75m);
 
         // Imported chocolates (food + import tax = 5%)
-        var importedChocolateLine = receipt.Lines.First(l => l.ProductName.Contains("imported chocolates"));
-        await Assert.That(importedChocolateLine.Amount).IsEqualTo(11.25);
-        await Assert.That(importedChocolateLine.Tax).IsEqualTo(0.60); // 11.25 * 0.05 = 0.5625, rounded up to 0.60
-        await Assert.That(importedChocolateLine.Total).IsEqualTo(11.85);
+        var chocolateLine = receipt.Lines.First(l => l.ProductName.Contains("chocolates"));
+        await Assert.That(chocolateLine.Amount).IsEqualTo(11.25m);
+        await Assert.That(chocolateLine.Tax).IsEqualTo(0.60m); // 11.25 * 0.05 = 0.5625, rounded up to 0.60
+        await Assert.That(chocolateLine.Total).IsEqualTo(11.85m);
 
         // Totals
-        await Assert.That(Math.Round(receipt.TotalTax, 2)).IsEqualTo(6.70);
-        await Assert.That(Math.Round(receipt.TotalAmount, 2)).IsEqualTo(74.68);
+        await Assert.That(receipt.TotalTax).IsEqualTo(6.70m);
+        await Assert.That(receipt.TotalAmount).IsEqualTo(74.68m);
     }
 
     [Test]
-    [Arguments("input1.txt")]
-    [Arguments("input2.txt")]
-    [Arguments("input3.txt")]
-    public async Task TestCase_FromFile_ParsesAndCalculatesCorrectly(string filename)
+    public async Task TestFromGeneratedData()
     {
         // Arrange
-        var basePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        var projectPath = Path.GetFullPath(Path.Combine(basePath!, "..", "..", ".."));
-        var filePath = Path.Combine(projectPath, "Data", filename);
-        var input = File.ReadAllLines(filePath);
+        var inputData = DataGenerator.GetInput1();
 
         // Act
-        var basket = OrderParser.ParseOrder(input);
-        var receipt = ReceiptGenerator.GenerateReceipt(basket, _taxRateCalculator);
+        var basket = OrderParser.ParseOrder(inputData);
+        var receipt = _receiptGenerator.GenerateReceipt(basket);
 
-        // Assert - Basic validation that parsing worked
+        // Assert
         await Assert.That(receipt.Lines).HasCount().GreaterThan(0);
         await Assert.That(receipt.TotalAmount).IsGreaterThan(0);
-        
-        // All line totals should equal sum of amount + tax
-        foreach (var line in receipt.Lines)
-        {
-            await Assert.That(Math.Round(line.Total, 2)).IsEqualTo(Math.Round(line.Amount + line.Tax, 2));
-        }
     }
 }

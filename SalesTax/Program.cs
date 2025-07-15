@@ -39,7 +39,7 @@ while (true)
     Console.WriteLine("\nCurrent basket:");
     foreach (var (product, quantity) in basket.GetItems())
     {
-        Console.WriteLine($"  {quantity} x {product.Name} - ${product.Price:0.00} each");
+        Console.WriteLine($"  {quantity} x {product.Name} - {product.Price:0.00} each");
     }
     
     Console.Write("\nAdd more products? (y/n): ");

@@ -19,7 +19,7 @@ namespace SalesTax
         public static Product ParseProductLine(string line)
         {
             string[] substrings = line.Split([" at "], 2, StringSplitOptions.TrimEntries);
-            bool canParsePrice = double.TryParse(substrings[1], out double price);
+            bool canParsePrice = decimal.TryParse(substrings[1], out decimal price);
             
             if (!canParsePrice)
                 throw new ArgumentException($"Could not parse price from line: {line}");
@@ -38,7 +38,7 @@ namespace SalesTax
         
         public static int ParseQuantityFromLine(string line)
         {
-            int indexOfSpace = line.IndexOf(" ");
+            int indexOfSpace = line.IndexOf(' ');
             bool canParseQuantity = int.TryParse(line[..indexOfSpace], out int qty);
             
             if (!canParseQuantity)
