@@ -14,8 +14,6 @@ namespace SalesTax
         public ProductCategory Category { get; } = category;
         public decimal Price { get; } = price;
         public bool IsImported { get; } = isImported;
-
-        public decimal CalculateBaseAmount(int quantity) => Price * quantity;
         
         public bool IsExemptFromSalesTax() => Category is ProductCategory.Food or ProductCategory.Book or ProductCategory.Medical;
 

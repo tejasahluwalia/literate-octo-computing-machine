@@ -43,7 +43,7 @@ namespace SalesTax
 
             foreach (var (product, quantity) in basket.GetItems())
             {
-                decimal baseAmount = product.CalculateBaseAmount(quantity);
+                decimal baseAmount = product.Price * quantity;
                 decimal tax = _taxCalculator.CalculateTax(product, quantity);
                 decimal lineTotal = baseAmount + tax;
 

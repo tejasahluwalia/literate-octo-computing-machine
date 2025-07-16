@@ -7,7 +7,7 @@ namespace SalesTax
 
         public decimal CalculateTax(Product product, int quantity)
         {
-            decimal baseAmount = product.CalculateBaseAmount(quantity);
+            decimal baseAmount = product.Price * quantity;
             decimal taxRate = GetTaxRate(product);
             decimal tax = baseAmount * taxRate;
             
