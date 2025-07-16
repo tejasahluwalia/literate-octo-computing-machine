@@ -12,10 +12,12 @@ namespace SalesTax
         {
             Quantity = quantity;
             ProductName = product.Name;
+
+            decimal unitTax = TaxCalculator.CalculateTaxForUnit(product, taxPolicy);
+            Tax = unitTax * quantity;
+
             Amount = product.Price * quantity;
-            var taxAmount = Amount * product.GetTaxRate(taxPolicy);
-            Tax = Math.Ceiling(taxAmount / 0.05m) * 0.05m;
-            
+
             Total = Amount + Tax;
         }
 
