@@ -11,15 +11,6 @@ public class TaxCalculatorTests
     private static readonly ImportSalesTax _importSalesTax = new(IMPORT_TAX_RATE);
     private static readonly TaxPolicy _taxPolicy = new([_basicSalesTax, _importSalesTax]);
 
-    private static decimal CalculateTax(Product product, int quantity)
-    {
-        var taxRate = product.GetTaxRate(_taxPolicy);
-        var totalAmount = product.Price * quantity;
-        var taxAmount = totalAmount * taxRate;
-        
-        // Round up to nearest 0.05
-        return Math.Ceiling(taxAmount / 0.05m) * 0.05m;
-    }
 
     [Test]
     public async Task CalculateTax_BookProduct_ReturnsZeroTax()
@@ -28,7 +19,7 @@ public class TaxCalculatorTests
         var book = new Product("book", ProductCategory.Book, 12.49m, false);
 
         // Act
-        var tax = CalculateTax(book, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(book, _taxPolicy);
 
         // Assert
         await Assert.That(tax).IsEqualTo(0.0m);
@@ -41,7 +32,7 @@ public class TaxCalculatorTests
         var importedBook = new Product("imported book", ProductCategory.Book, 12.49m, true);
 
         // Act
-        var tax = CalculateTax(importedBook, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(importedBook, _taxPolicy);
 
         // Assert
         // Expected: 12.49 * 0.05 = 0.6245, rounded up to nearest 0.05 = 0.65
@@ -55,7 +46,7 @@ public class TaxCalculatorTests
         var pills = new Product("headache pills", ProductCategory.Medical, 9.75m, false);
 
         // Act
-        var tax = CalculateTax(pills, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(pills, _taxPolicy);
 
         // Assert
         await Assert.That(tax).IsEqualTo(0.0m);
@@ -68,7 +59,7 @@ public class TaxCalculatorTests
         var importedPills = new Product("imported headache pills", ProductCategory.Medical, 9.75m, true);
 
         // Act
-        var tax = CalculateTax(importedPills, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(importedPills, _taxPolicy);
 
         // Assert
         // Expected: 9.75 * 0.05 = 0.4875, rounded up to nearest 0.05 = 0.50
@@ -82,7 +73,7 @@ public class TaxCalculatorTests
         var chocolate = new Product("chocolate bar", ProductCategory.Food, 0.85m, false);
 
         // Act
-        var tax = CalculateTax(chocolate, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(chocolate, _taxPolicy);
 
         // Assert
         await Assert.That(tax).IsEqualTo(0.0m);
@@ -95,7 +86,7 @@ public class TaxCalculatorTests
         var importedChocolate = new Product("imported chocolates", ProductCategory.Food, 10.00m, true);
 
         // Act
-        var tax = CalculateTax(importedChocolate, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(importedChocolate, _taxPolicy);
 
         // Assert
         // Expected: 10.00 * 0.05 = 0.50, already aligned to 0.05
@@ -109,7 +100,7 @@ public class TaxCalculatorTests
         var cd = new Product("music CD", ProductCategory.Other, 14.99m, false);
 
         // Act
-        var tax = CalculateTax(cd, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(cd, _taxPolicy);
 
         // Assert
         // Expected: 14.99 * 0.10 = 1.499, rounded up to nearest 0.05 = 1.50
@@ -123,24 +114,10 @@ public class TaxCalculatorTests
         var importedPerfume = new Product("imported perfume", ProductCategory.Other, 47.50m, true);
 
         // Act
-        var tax = CalculateTax(importedPerfume, 1);
+        var tax = TaxCalculator.CalculateTaxForUnit(importedPerfume, _taxPolicy);
 
         // Assert
         // Expected: 47.50 * 0.15 = 7.125, rounded up to nearest 0.05 = 7.15
         await Assert.That(tax).IsEqualTo(7.15m);
-    }
-
-    [Test]
-    public async Task CalculateTax_MultipleQuantity_CalculatesCorrectly()
-    {
-        // Arrange
-        var cd = new Product("music CD", ProductCategory.Other, 14.99m, false);
-
-        // Act
-        var tax = CalculateTax(cd, 2);
-
-        // Assert
-        // Expected: (14.99 * 2) * 0.10 = 2.998, rounded up to nearest 0.05 = 3.00
-        await Assert.That(tax).IsEqualTo(3.00m);
     }
 }
