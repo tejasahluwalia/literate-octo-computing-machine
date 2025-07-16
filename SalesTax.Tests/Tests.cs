@@ -10,7 +10,10 @@ public class SalesTaxIntegrationTests
 {
     private const decimal BASIC_SALES_TAX_RATE = 10.0m / 100;
     private const decimal IMPORT_TAX_RATE = 5.0m / 100;
-    private readonly TaxCalculator _taxCalculator = new(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
+
+    private static readonly BasicSalesTax _basicSalesTax = new(BASIC_SALES_TAX_RATE);
+    private static readonly ImportSalesTax _importSalesTax = new(IMPORT_TAX_RATE);
+    private static readonly TaxStrategy _taxStrategy = new([_basicSalesTax, _importSalesTax]);
 
     [Test]
     [MethodDataSource(typeof(DataGenerator), nameof(DataGenerator.GetSalesTaxTestData))]
@@ -18,15 +21,15 @@ public class SalesTaxIntegrationTests
     {
         // Arrange & Act
         var basket = OrderParser.ParseOrder(testData.InputLines);
-        var receipt = new Receipt(basket, _taxCalculator);
+        var receipt = new Receipt(basket, _taxStrategy);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(testData.ExpectedLines);
         
         // Check sales tax
-        await Assert.That(receipt.TotalSalesTax).IsEqualTo(testData.ExpectedSalesTax);
+        await Assert.That(receipt.GetTotalTax()).IsEqualTo(testData.ExpectedSalesTax);
         
         // Check total
-        await Assert.That(receipt.Total).IsEqualTo(testData.ExpectedTotal);
+        await Assert.That(receipt.GetTotal()).IsEqualTo(testData.ExpectedTotal);
     }
 }

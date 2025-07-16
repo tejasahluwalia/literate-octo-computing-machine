@@ -5,28 +5,24 @@ namespace SalesTax
     public class Receipt
     {
         private readonly List<ReceiptLine> _lines = [];
-        private readonly decimal _totalTax = 0;
-        private readonly decimal _totalAmount = 0;
 
-        public Receipt(Basket basket, TaxCalculator taxCalculator)
+        public Receipt(Basket basket, TaxStrategy taxStrategy)
         {
             foreach (var (product, quantity) in basket.GetItems())
             {
-                decimal baseAmount = product.Price * quantity;
-                decimal tax = taxCalculator.CalculateTax(product, quantity);
-                decimal lineTotal = baseAmount + tax;
-
-                _lines.Add(new ReceiptLine(quantity, product.Name, baseAmount, tax, lineTotal));
-                _totalAmount += baseAmount;
-                _totalTax += tax;
+                _lines.Add(new ReceiptLine(quantity, product, taxStrategy));
             }
         }
 
         public IReadOnlyList<ReceiptLine> Lines => _lines.AsReadOnly();
 
-        public decimal TotalSalesTax => _totalTax;
-        
-        public decimal Total => _totalAmount + _totalTax;
+        public decimal GetTotalTax() {
+            return _lines.Sum(line => line.Tax);
+        }
+
+        public decimal GetTotal() {
+            return _lines.Sum(line => line.Total);
+        }   
 
         public override string ToString()
         {
@@ -34,8 +30,8 @@ namespace SalesTax
             foreach (var line in _lines)
                 result.AppendLine(line.ToString());
 
-            result.AppendLine($"Sales Taxes: {TotalSalesTax:F2}");
-            result.AppendLine($"Total: {Total:F2}");
+            result.AppendLine($"Sales Taxes: {GetTotalTax():F2}");
+            result.AppendLine($"Total: {GetTotal():F2}");
             return result.ToString();
         }
     }

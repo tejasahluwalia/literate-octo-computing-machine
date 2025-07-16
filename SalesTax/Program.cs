@@ -8,8 +8,10 @@ Console.WriteLine("ORDER INPUT:");
 decimal BASIC_SALES_TAX_RATE = 10.0m/100;
 decimal IMPORT_TAX_RATE = 5.0m/100;
 
-var taxCalculator = new TaxCalculator(BASIC_SALES_TAX_RATE, IMPORT_TAX_RATE);
-var basket = new Basket();
+Basket basket = new();
+BasicSalesTax basicSalesTax = new(BASIC_SALES_TAX_RATE);
+ImportSalesTax importSalesTax = new(IMPORT_TAX_RATE);
+TaxStrategy taxStrategy = new([basicSalesTax, importSalesTax]);
 
 while (true)
 {
@@ -35,5 +37,5 @@ while (true)
 }
 
 Console.WriteLine("\n--- RECEIPT ---");
-var receipt = new Receipt(basket, taxCalculator);
+var receipt = new Receipt(basket, taxStrategy);
 Console.WriteLine(receipt);

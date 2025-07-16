@@ -15,15 +15,26 @@ namespace SalesTax
         public decimal Price { get; } = price;
         public bool IsImported { get; } = isImported;
         
-        public bool IsExemptFromSalesTax() => Category is ProductCategory.Food or ProductCategory.Book or ProductCategory.Medical;
+        public decimal GetTaxRate(TaxStrategy taxStrategy)
+        {
+            decimal taxRate = 0;
+            foreach (var tax in taxStrategy.Taxes)
+            {
+                if (!tax.IsProductExempt(this))
+                {
+                    taxRate += tax.Rate;
+                }
+            }
+            return taxRate;
+        }
 
         // Override Equals and GetHashCode for proper dictionary usage
         public override bool Equals(object? obj)
         {
             if (obj is not Product other) return false;
-            return Name == other.Name && 
-                   Category == other.Category && 
-                   Price == other.Price && 
+            return Name == other.Name &&
+                   Category == other.Category &&
+                   Price == other.Price &&
                    IsImported == other.IsImported;
         }
 
