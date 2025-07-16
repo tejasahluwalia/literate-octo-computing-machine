@@ -8,12 +8,12 @@ namespace SalesTax
         public readonly decimal Total;
         public readonly int Quantity;
 
-        public ReceiptLine(int quantity, Product product, TaxStrategy taxStrategy)
+        public ReceiptLine(int quantity, Product product, TaxPolicy taxPolicy)
         {
             Quantity = quantity;
             ProductName = product.Name;
             Amount = product.Price * quantity;
-            var taxAmount = Amount * product.GetTaxRate(taxStrategy);
+            var taxAmount = Amount * product.GetTaxRate(taxPolicy);
             Tax = Math.Ceiling(taxAmount / 0.05m) * 0.05m;
             
             Total = Amount + Tax;

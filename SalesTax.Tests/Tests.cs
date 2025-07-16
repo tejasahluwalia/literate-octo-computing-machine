@@ -13,7 +13,7 @@ public class SalesTaxIntegrationTests
 
     private static readonly BasicSalesTax _basicSalesTax = new(BASIC_SALES_TAX_RATE);
     private static readonly ImportSalesTax _importSalesTax = new(IMPORT_TAX_RATE);
-    private static readonly TaxStrategy _taxStrategy = new([_basicSalesTax, _importSalesTax]);
+    private static readonly TaxPolicy _taxPolicy = new([_basicSalesTax, _importSalesTax]);
 
     [Test]
     [MethodDataSource(typeof(DataGenerator), nameof(DataGenerator.GetSalesTaxTestData))]
@@ -21,7 +21,7 @@ public class SalesTaxIntegrationTests
     {
         // Arrange & Act
         var basket = OrderParser.ParseOrder(testData.InputLines);
-        var receipt = new Receipt(basket, _taxStrategy);
+        var receipt = new Receipt(basket, _taxPolicy);
 
         // Assert
         await Assert.That(receipt.Lines).HasCount().EqualTo(testData.ExpectedLines);

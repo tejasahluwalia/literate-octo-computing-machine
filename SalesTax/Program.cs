@@ -11,7 +11,7 @@ decimal IMPORT_TAX_RATE = 5.0m/100;
 Basket basket = new();
 BasicSalesTax basicSalesTax = new(BASIC_SALES_TAX_RATE);
 ImportSalesTax importSalesTax = new(IMPORT_TAX_RATE);
-TaxStrategy taxStrategy = new([basicSalesTax, importSalesTax]);
+TaxPolicy taxPolicy = new([basicSalesTax, importSalesTax]);
 
 while (true)
 {
@@ -37,5 +37,5 @@ while (true)
 }
 
 Console.WriteLine("\n--- RECEIPT ---");
-var receipt = new Receipt(basket, taxStrategy);
+var receipt = new Receipt(basket, taxPolicy);
 Console.WriteLine(receipt);

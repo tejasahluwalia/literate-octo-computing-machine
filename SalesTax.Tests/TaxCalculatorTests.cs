@@ -9,11 +9,11 @@ public class TaxCalculatorTests
     
     private static readonly BasicSalesTax _basicSalesTax = new(BASIC_SALES_TAX_RATE);
     private static readonly ImportSalesTax _importSalesTax = new(IMPORT_TAX_RATE);
-    private static readonly TaxStrategy _taxStrategy = new([_basicSalesTax, _importSalesTax]);
+    private static readonly TaxPolicy _taxPolicy = new([_basicSalesTax, _importSalesTax]);
 
     private static decimal CalculateTax(Product product, int quantity)
     {
-        var taxRate = product.GetTaxRate(_taxStrategy);
+        var taxRate = product.GetTaxRate(_taxPolicy);
         var totalAmount = product.Price * quantity;
         var taxAmount = totalAmount * taxRate;
         

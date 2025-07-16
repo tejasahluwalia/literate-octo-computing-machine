@@ -15,10 +15,10 @@ namespace SalesTax
         public decimal Price { get; } = price;
         public bool IsImported { get; } = isImported;
         
-        public decimal GetTaxRate(TaxStrategy taxStrategy)
+        public decimal GetTaxRate(TaxPolicy taxPolicy)
         {
             decimal taxRate = 0;
-            foreach (var tax in taxStrategy.Taxes)
+            foreach (var tax in taxPolicy.Taxes)
             {
                 if (!tax.IsProductExempt(this))
                 {

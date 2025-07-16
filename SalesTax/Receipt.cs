@@ -6,11 +6,11 @@ namespace SalesTax
     {
         private readonly List<ReceiptLine> _lines = [];
 
-        public Receipt(Basket basket, TaxStrategy taxStrategy)
+        public Receipt(Basket basket, TaxPolicy taxPolicy)
         {
             foreach (var (product, quantity) in basket.GetItems())
             {
-                _lines.Add(new ReceiptLine(quantity, product, taxStrategy));
+                _lines.Add(new ReceiptLine(quantity, product, taxPolicy));
             }
         }
 
